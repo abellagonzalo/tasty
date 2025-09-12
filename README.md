@@ -15,7 +15,8 @@ tasty/
 │       │   └── PositionsList.tsx    # Positions display component
 │       ├── services/    # API and service functions
 │       │   ├── api.ts              # Backend API client
-│       │   └── ibkrService.ts      # IBKR CSV processing service
+│       │   ├── ibkrService.ts      # IBKR CSV processing service
+│       │   └── positionService.ts  # Position conversion and validation
 │       ├── types/       # TypeScript interfaces and types
 │       │   ├── Position.ts         # Position-related types
 │       │   └── ibkr.ts            # IBKR data structure types
@@ -76,7 +77,7 @@ Current:
 - Development environment setup
 - Manual position entry
 - Position listing and management
-- IBKR Activity Flex Query CSV import
+- IBKR Activity Flex Query CSV import with automatic position creation
 
 Planned:
 - User authentication
@@ -97,7 +98,26 @@ The application supports importing trading data from Interactive Brokers Activit
 - Error handling and validation feedback
 - Automatic position creation from trades
 
-Required CSV columns:
+#### Import Process
+1. File Upload
+   - Accepts CSV files from IBKR Activity Flex Query
+   - Validates file format and content
+   - Shows upload progress
+
+2. Trade Processing
+   - Filters for option trades only
+   - Processes opening trades
+   - Converts IBKR trade format to position format
+   - Validates position data
+   - Shows preview of detected trades
+
+3. Position Creation
+   - Creates positions in batch
+   - Handles duplicate detection
+   - Updates existing positions if necessary
+   - Refreshes position list automatically
+
+#### Required CSV Columns
 - DateTime: Trade execution date and time
 - Symbol: Trading symbol
 - Description: Full contract description
@@ -113,6 +133,10 @@ Required CSV columns:
 - Open/CloseIndicator: Whether opening or closing position
 - FifoPnlRealized: Realized P&L for closed positions
 - MtmPnl: Mark-to-market P&L
+
+#### API Endpoints
+- POST `/api/positions/batch` - Create multiple positions
+- POST `/api/positions/import/ibkr` - Import IBKR trades
 
 ## Development
 
