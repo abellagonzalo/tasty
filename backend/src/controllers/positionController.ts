@@ -19,6 +19,46 @@ export class PositionController {
     }
   }
 
+  async createPositions(req: Request, res: Response) {
+    try {
+      const positionsData: CreatePositionDTO[] = req.body;
+      
+      // Validate array
+      if (!Array.isArray(positionsData)) {
+        return res.status(400).json({ error: 'Request body must be an array of positions' });
+      }
+
+      if (positionsData.length === 0) {
+        return res.status(400).json({ error: 'No positions provided' });
+      }
+
+      // Validate each position
+      const validationErrors: string[] = [];
+      positionsData.forEach((position, index) => {
+        if (!this.validatePositionData(position)) {
+          validationErrors.push(`Invalid position data at index ${index}`);
+        }
+      });
+
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ 
+          error: 'Validation failed',
+          details: validationErrors 
+        });
+      }
+
+      // Create all positions
+      const positions = await positionService.createPositions(positionsData);
+      res.status(201).json(positions);
+    } catch (error) {
+      console.error('Failed to create positions:', error);
+      res.status(500).json({ 
+        error: 'Failed to create positions',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
   async getPositions(req: Request, res: Response) {
     try {
       const positions = await positionService.getPositions();
@@ -65,6 +105,8 @@ export class PositionController {
   }
 
   private validatePositionData(data: CreatePositionDTO): boolean {
+    if (!data) return false;
+    
     return (
       typeof data.symbol === 'string' &&
       data.symbol.length > 0 &&

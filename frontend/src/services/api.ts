@@ -33,12 +33,5 @@ export const api = {
     delete: async (id: string): Promise<void> => {
       await axios.delete(`${API_BASE_URL}/positions/${id}`);
     }
-  },
-  
-  ibkr: {
-    importTrades: async (positions: CreatePositionDTO[]): Promise<Position[]> => {
-      const response = await axios.post(`${API_BASE_URL}/positions/import/ibkr`, positions);
-      return response.data;
-    }
   }
 };

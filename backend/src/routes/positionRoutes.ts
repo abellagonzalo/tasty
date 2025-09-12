@@ -7,6 +7,9 @@ const positionController = new PositionController();
 // CREATE: POST /api/positions
 router.post('/', (req, res) => positionController.createPosition(req, res));
 
+// CREATE BATCH: POST /api/positions/batch
+router.post('/batch', (req, res) => positionController.createPositions(req, res));
+
 // READ: GET /api/positions
 router.get('/', (req, res) => positionController.getPositions(req, res));
 

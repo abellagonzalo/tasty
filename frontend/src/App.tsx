@@ -83,13 +83,17 @@ function App() {
         throw new Error(`Validation errors:\n${allErrors.join('\n')}`);
       }
 
-      // Import positions
-      await api.ibkr.importTrades(newPositions);
-      
-      // Reload positions
-      await loadPositions();
-      
-      setSuccess(`Successfully imported ${newPositions.length} positions from IBKR`);
+      // Import positions using batch creation
+      if (newPositions.length > 0) {
+        await api.positions.createBatch(newPositions);
+        
+        // Reload positions
+        await loadPositions();
+        
+        setSuccess(`Successfully imported ${newPositions.length} positions from IBKR`);
+      } else {
+        setSuccess('No new positions to import from the file');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to import IBKR trades');
     } finally {
