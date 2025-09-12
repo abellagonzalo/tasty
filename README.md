@@ -9,6 +9,17 @@ tasty/
 ├── frontend/             # React TypeScript frontend application
 │   ├── public/          # Static files
 │   └── src/             # Source code
+│       ├── components/  # React components
+│       │   ├── IBKRImport.tsx       # IBKR CSV import component
+│       │   ├── PositionForm.tsx     # Manual position entry form
+│       │   └── PositionsList.tsx    # Positions display component
+│       ├── services/    # API and service functions
+│       │   ├── api.ts              # Backend API client
+│       │   └── ibkrService.ts      # IBKR CSV processing service
+│       ├── types/       # TypeScript interfaces and types
+│       │   ├── Position.ts         # Position-related types
+│       │   └── ibkr.ts            # IBKR data structure types
+│       └── utils/       # Utility functions
 │
 ├── backend/             # Node.js TypeScript backend application
 │   ├── src/            # Source code
@@ -49,6 +60,8 @@ The frontend will start on http://localhost:3000
 - TypeScript
 - Material-UI (MUI) for components
 - Axios for API calls
+- PapaParse for CSV parsing
+- React-Dropzone for file uploads
 
 ### Backend
 - Node.js
@@ -61,15 +74,45 @@ The frontend will start on http://localhost:3000
 Current:
 - Basic application structure
 - Development environment setup
+- Manual position entry
+- Position listing and management
+- IBKR Activity Flex Query CSV import
 
 Planned:
 - User authentication
-- Options position tracking
 - P&L calculation and monitoring
 - Trade adjustment recording
 - Position roll tracking
 - Performance reporting
 - Data export capabilities
+
+## Data Import Support
+
+### IBKR Activity Flex Query Import
+The application supports importing trading data from Interactive Brokers Activity Flex Query reports in CSV format. The import feature supports:
+
+- Drag-and-drop file upload
+- CSV parsing and validation
+- Trade data preview
+- Error handling and validation feedback
+- Automatic position creation from trades
+
+Required CSV columns:
+- DateTime: Trade execution date and time
+- Symbol: Trading symbol
+- Description: Full contract description
+- TradePrice: Execution price
+- Quantity: Number of contracts
+- Put/Call: Option type
+- Strike: Strike price
+- Expiry: Contract expiration date
+- TransactionType: Type of transaction
+- Buy/Sell: Trade direction
+- IBCommission: Commission paid
+- NetCash: Net cash impact
+- Open/CloseIndicator: Whether opening or closing position
+- FifoPnlRealized: Realized P&L for closed positions
+- MtmPnl: Mark-to-market P&L
 
 ## Development
 

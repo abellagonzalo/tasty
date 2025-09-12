@@ -7,11 +7,14 @@ import {
   Box,
   Alert,
   Snackbar,
+  Divider,
 } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import { PositionForm } from './components/PositionForm';
 import { PositionsList } from './components/PositionsList';
+import { IBKRImport } from './components/IBKRImport';
 import { Position, CreatePositionDTO } from './types/Position';
+import { IBKRTrade } from './types/ibkr';
 import { api } from './services/api';
 
 const theme = createTheme({
@@ -58,6 +61,16 @@ function App() {
     }
   };
 
+  const handleIBKRImport = async (trades: IBKRTrade[]) => {
+    try {
+      // For now, just show success message
+      // TODO: Implement actual trade import logic
+      setSuccess(`Successfully processed ${trades.length} trades from IBKR`);
+    } catch (err) {
+      setError('Failed to import IBKR trades');
+    }
+  };
+
   const handleCloseAlert = () => {
     setError(null);
     setSuccess(null);
@@ -72,6 +85,18 @@ function App() {
             Options Positions
           </Typography>
           
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Import IBKR Trades
+            </Typography>
+            <IBKRImport onImportComplete={handleIBKRImport} />
+          </Box>
+
+          <Divider sx={{ my: 4 }} />
+          
+          <Typography variant="h5" gutterBottom>
+            Add Position Manually
+          </Typography>
           <PositionForm onSubmit={handleCreatePosition} />
           
           <Box sx={{ mt: 4 }}>
