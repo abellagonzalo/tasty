@@ -24,6 +24,10 @@ tasty/
 │
 ├── backend/             # Node.js TypeScript backend application
 │   ├── src/            # Source code
+│   │   ├── controllers/  # Request handlers
+│   │   ├── models/      # Data models
+│   │   ├── routes/      # API routes
+│   │   └── services/    # Business logic
 │   ├── package.json    # Backend dependencies
 │   └── tsconfig.json   # TypeScript configuration
 │
@@ -78,6 +82,7 @@ Current:
 - Manual position entry
 - Position listing and management
 - IBKR Activity Flex Query CSV import with automatic position creation
+- Batch position creation
 
 Planned:
 - User authentication
@@ -86,6 +91,25 @@ Planned:
 - Position roll tracking
 - Performance reporting
 - Data export capabilities
+
+## API Endpoints
+
+### Positions
+
+#### Single Position Operations
+- `POST /api/positions` - Create a single position
+- `GET /api/positions` - Get all positions
+- `GET /api/positions/:id` - Get a specific position
+- `PUT /api/positions/:id` - Update a position
+- `DELETE /api/positions/:id` - Delete a position
+
+#### Batch Operations
+- `POST /api/positions/batch` - Create multiple positions
+  - Request body: Array of position objects
+  - Validates all positions before creation
+  - Creates all positions with consistent timestamps
+  - Returns array of created positions
+  - Provides detailed validation errors if any position is invalid
 
 ## Data Import Support
 
@@ -133,10 +157,6 @@ The application supports importing trading data from Interactive Brokers Activit
 - Open/CloseIndicator: Whether opening or closing position
 - FifoPnlRealized: Realized P&L for closed positions
 - MtmPnl: Mark-to-market P&L
-
-#### API Endpoints
-- POST `/api/positions/batch` - Create multiple positions
-- POST `/api/positions/import/ibkr` - Import IBKR trades
 
 ## Development
 
