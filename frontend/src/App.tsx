@@ -16,6 +16,7 @@ import { IBKRImport } from './components/IBKRImport';
 import { Position, CreatePositionDTO } from './types/Position';
 import { IBKRTrade } from './types/ibkr';
 import { api } from './services/api';
+import { PositionService } from './services/positionService';
 
 const theme = createTheme({
   palette: {
@@ -27,6 +28,7 @@ function App() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     loadPositions();
@@ -63,11 +65,35 @@ function App() {
 
   const handleIBKRImport = async (trades: IBKRTrade[]) => {
     try {
-      // For now, just show success message
-      // TODO: Implement actual trade import logic
-      setSuccess(`Successfully processed ${trades.length} trades from IBKR`);
+      setIsImporting(true);
+      
+      // Convert IBKR trades to positions
+      const newPositions = PositionService.processIBKRTrades(trades);
+      
+      // Validate all positions
+      const allErrors: string[] = [];
+      newPositions.forEach((position, index) => {
+        const validationErrors = PositionService.validatePosition(position);
+        if (validationErrors.length > 0) {
+          allErrors.push(`Position ${index + 1} (${position.symbol}): ${validationErrors.join(', ')}`);
+        }
+      });
+
+      if (allErrors.length > 0) {
+        throw new Error(`Validation errors:\n${allErrors.join('\n')}`);
+      }
+
+      // Import positions
+      await api.ibkr.importTrades(newPositions);
+      
+      // Reload positions
+      await loadPositions();
+      
+      setSuccess(`Successfully imported ${newPositions.length} positions from IBKR`);
     } catch (err) {
-      setError('Failed to import IBKR trades');
+      setError(err instanceof Error ? err.message : 'Failed to import IBKR trades');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -89,7 +115,10 @@ function App() {
             <Typography variant="h5" gutterBottom>
               Import IBKR Trades
             </Typography>
-            <IBKRImport onImportComplete={handleIBKRImport} />
+            <IBKRImport 
+              onImportComplete={handleIBKRImport}
+              isProcessing={isImporting}
+            />
           </Box>
 
           <Divider sx={{ my: 4 }} />

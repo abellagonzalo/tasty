@@ -10,6 +10,11 @@ export const api = {
       return response.data;
     },
     
+    createBatch: async (positions: CreatePositionDTO[]): Promise<Position[]> => {
+      const response = await axios.post(`${API_BASE_URL}/positions/batch`, positions);
+      return response.data;
+    },
+    
     getAll: async (): Promise<Position[]> => {
       const response = await axios.get(`${API_BASE_URL}/positions`);
       return response.data;
@@ -27,6 +32,13 @@ export const api = {
     
     delete: async (id: string): Promise<void> => {
       await axios.delete(`${API_BASE_URL}/positions/${id}`);
+    }
+  },
+  
+  ibkr: {
+    importTrades: async (positions: CreatePositionDTO[]): Promise<Position[]> => {
+      const response = await axios.post(`${API_BASE_URL}/positions/import/ibkr`, positions);
+      return response.data;
     }
   }
 };

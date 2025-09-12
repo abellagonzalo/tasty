@@ -19,10 +19,13 @@ import { IBKRTrade, ImportResult } from '../types/ibkr';
 
 interface IBKRImportProps {
     onImportComplete?: (trades: IBKRTrade[]) => void;
+    isProcessing?: boolean;
 }
 
-export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
-    const [isProcessing, setIsProcessing] = useState(false);
+export const IBKRImport: React.FC<IBKRImportProps> = ({ 
+    onImportComplete,
+    isProcessing = false 
+}) => {
     const [result, setResult] = useState<ImportResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +41,6 @@ export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
             return;
         }
 
-        setIsProcessing(true);
         setError(null);
         setResult(null);
 
@@ -50,8 +52,6 @@ export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error processing file');
-        } finally {
-            setIsProcessing(false);
         }
     }, [onImportComplete]);
 
@@ -60,7 +60,8 @@ export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
         accept: {
             'text/csv': ['.csv']
         },
-        maxFiles: 1
+        maxFiles: 1,
+        disabled: isProcessing
     });
 
     return (
@@ -73,14 +74,20 @@ export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
                     borderColor: isDragActive ? 'primary.main' : 'grey.300',
                     borderRadius: 2,
                     backgroundColor: isDragActive ? 'action.hover' : 'background.paper',
-                    cursor: 'pointer',
-                    mb: 2
+                    cursor: isProcessing ? 'not-allowed' : 'pointer',
+                    mb: 2,
+                    opacity: isProcessing ? 0.7 : 1
                 }}
             >
                 <input {...getInputProps()} />
                 <Box sx={{ textAlign: 'center' }}>
                     {isProcessing ? (
-                        <CircularProgress size={24} sx={{ mb: 1 }} />
+                        <>
+                            <CircularProgress size={24} sx={{ mb: 1 }} />
+                            <Typography variant="body1" sx={{ ml: 2 }}>
+                                Processing trades...
+                            </Typography>
+                        </>
                     ) : (
                         <Typography variant="body1">
                             {isDragActive
@@ -105,10 +112,10 @@ export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
                 </Alert>
             )}
 
-            {result?.success && result.trades.length > 0 && (
+            {result?.success && result.trades.length > 0 && !isProcessing && (
                 <Box sx={{ mt: 3 }}>
                     <Typography variant="h6" sx={{ mb: 2 }}>
-                        Imported Trades: {result.trades.length}
+                        Found Trades: {result.trades.length}
                     </Typography>
                     <TableContainer component={Paper}>
                         <Table size="small">
@@ -125,7 +132,7 @@ export const IBKRImport: React.FC<IBKRImportProps> = ({ onImportComplete }) => {
                             <TableBody>
                                 {result.trades.slice(0, 5).map((trade, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{trade.dateTime.toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(trade.dateTime).toLocaleDateString()}</TableCell>
                                         <TableCell>{trade.symbol}</TableCell>
                                         <TableCell>{trade.putCall || 'STOCK'}</TableCell>
                                         <TableCell align="right">{trade.quantity}</TableCell>
