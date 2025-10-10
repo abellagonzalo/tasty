@@ -1,0 +1,5 @@
+DateTime,Symbol,Description,TradePrice,Quantity,Put/Call,Strike,Expiry,TransactionType,Buy/Sell,IBCommission,NetCash,Open/CloseIndicator,FifoPnlRealized,MtmPnl
+2024-01-15 10:30:00,SPY,SPY 19JAN24 450.0 C,5.50,1,C,450,2024-01-19,ExchTrade,BUY,-1.00,-551.00,O,0,0
+2024-01-15 14:30:00,AAPL,AAPL 19JAN24 180.0 P,3.50,2,P,180,2024-01-19,ExchTrade,SELL,-2.00,698.00,O,0,0
+2024-01-15 14:30:00,AAPL,,0,0,,,,,,-2.00,-2.00,,0,0
+2024-01-16 09:15:00,TSLA,TSLA 26JAN24 250.0 C,8.25,1,C,250,2024-01-26,ExchTrade,BUY,-1.00,-826.00,O,0,0
