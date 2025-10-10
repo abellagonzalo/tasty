@@ -1,0 +1,486 @@
+{
+  "consumer": {
+    "name": "TastyFrontend"
+  },
+  "interactions": [
+    {
+      "description": "a request to create a single position",
+      "providerStates": [
+        {
+          "name": "no positions exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "entryDate": "2024-01-15T00:00:00.000Z",
+          "entryPrice": 5.25,
+          "expirationDate": "2024-12-20T00:00:00.000Z",
+          "optionType": "CALL",
+          "positionSide": "LONG",
+          "quantity": 10,
+          "strikePrice": 150,
+          "symbol": "AAPL"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/positions"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2024-01-15T00:00:00.000Z",
+          "entryDate": "2024-01-15T00:00:00.000Z",
+          "entryPrice": 5.25,
+          "expirationDate": "2024-12-20T00:00:00.000Z",
+          "id": "test-id-123",
+          "optionType": "CALL",
+          "positionSide": "LONG",
+          "quantity": 10,
+          "strikePrice": 150,
+          "symbol": "AAPL",
+          "updatedAt": "2024-01-15T00:00:00.000Z"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      }
+    },
+    {
+      "description": "a request to create multiple positions",
+      "providerStates": [
+        {
+          "name": "no positions exist"
+        }
+      ],
+      "request": {
+        "body": [
+          {
+            "entryDate": "2024-01-15T00:00:00.000Z",
+            "entryPrice": 5.25,
+            "expirationDate": "2024-12-20T00:00:00.000Z",
+            "optionType": "CALL",
+            "positionSide": "LONG",
+            "quantity": 10,
+            "strikePrice": 150,
+            "symbol": "AAPL"
+          },
+          {
+            "entryDate": "2024-01-15T00:00:00.000Z",
+            "entryPrice": 5.25,
+            "expirationDate": "2024-12-20T00:00:00.000Z",
+            "optionType": "CALL",
+            "positionSide": "LONG",
+            "quantity": 10,
+            "strikePrice": 200,
+            "symbol": "TSLA"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/positions/batch"
+      },
+      "response": {
+        "body": [
+          {
+            "createdAt": "2024-01-15T00:00:00.000Z",
+            "entryDate": "2024-01-15T00:00:00.000Z",
+            "entryPrice": 5.25,
+            "expirationDate": "2024-12-20T00:00:00.000Z",
+            "id": "test-id-1",
+            "optionType": "CALL",
+            "positionSide": "LONG",
+            "quantity": 10,
+            "strikePrice": 150,
+            "symbol": "AAPL",
+            "updatedAt": "2024-01-15T00:00:00.000Z"
+          },
+          {
+            "createdAt": "2024-01-15T00:00:00.000Z",
+            "entryDate": "2024-01-15T00:00:00.000Z",
+            "entryPrice": 5.25,
+            "expirationDate": "2024-12-20T00:00:00.000Z",
+            "id": "test-id-2",
+            "optionType": "CALL",
+            "positionSide": "LONG",
+            "quantity": 10,
+            "strikePrice": 200,
+            "symbol": "TSLA",
+            "updatedAt": "2024-01-15T00:00:00.000Z"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$[0].createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$[0].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[0].updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$[1].createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$[1].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[1].updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      }
+    },
+    {
+      "description": "a request to delete a position",
+      "providerStates": [
+        {
+          "name": "a position with ID test-id-123 exists"
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "path": "/api/positions/test-id-123"
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
+      "description": "a request to get a non-existent position",
+      "providerStates": [
+        {
+          "name": "no positions exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/positions/non-existent-id"
+      },
+      "response": {
+        "body": {
+          "error": "Position not found"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request to get a position by ID",
+      "providerStates": [
+        {
+          "name": "a position with ID test-id-123 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/positions/test-id-123"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2024-01-15T00:00:00.000Z",
+          "entryDate": "2024-01-15T00:00:00.000Z",
+          "entryPrice": 5.25,
+          "expirationDate": "2024-12-20T00:00:00.000Z",
+          "id": "test-id-123",
+          "optionType": "CALL",
+          "positionSide": "LONG",
+          "quantity": 10,
+          "strikePrice": 150,
+          "symbol": "AAPL",
+          "updatedAt": "2024-01-15T00:00:00.000Z"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to get all positions",
+      "providerStates": [
+        {
+          "name": "positions exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/positions"
+      },
+      "response": {
+        "body": [
+          {
+            "createdAt": "2024-01-15T00:00:00.000Z",
+            "entryDate": "2024-01-15T00:00:00.000Z",
+            "entryPrice": 5.25,
+            "expirationDate": "2024-12-20T00:00:00.000Z",
+            "id": "test-id-1",
+            "optionType": "CALL",
+            "positionSide": "LONG",
+            "quantity": 10,
+            "strikePrice": 150,
+            "symbol": "AAPL",
+            "updatedAt": "2024-01-15T00:00:00.000Z"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$[0].createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$[0].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[0].updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to update a position",
+      "providerStates": [
+        {
+          "name": "a position with ID test-id-123 exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "entryPrice": 6,
+          "quantity": 20
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "PUT",
+        "path": "/api/positions/test-id-123"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2024-01-15T00:00:00.000Z",
+          "entryDate": "2024-01-15T00:00:00.000Z",
+          "entryPrice": 6,
+          "expirationDate": "2024-12-20T00:00:00.000Z",
+          "id": "test-id-123",
+          "optionType": "CALL",
+          "positionSide": "LONG",
+          "quantity": 20,
+          "strikePrice": 150,
+          "symbol": "AAPL",
+          "updatedAt": "2024-01-15T00:00:00.000Z"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request with invalid position data",
+      "providerStates": [
+        {
+          "name": "no positions exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "symbol": "AAPL"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/positions"
+      },
+      "response": {
+        "body": {
+          "error": "Validation error"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 400
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "16.0.0"
+    },
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "TastyBackend"
+  }
+}

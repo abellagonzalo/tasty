@@ -7,7 +7,8 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "test:pact": "jest pact.provider.test.ts"
   },
   "keywords": [
     "options",
@@ -29,6 +30,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^16.0.0",
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
     "jest": "^30.2.0",

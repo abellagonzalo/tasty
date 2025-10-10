@@ -142,6 +142,26 @@ When adding new features to `ibkrService.ts`, ensure corresponding tests are add
 
 Currently, backend tests are not yet implemented. When adding backend tests, follow the same patterns as frontend tests.
 
+### Contract Tests (Pact)
+Contract testing ensures the frontend and backend API stay in sync:
+
+- **Consumer tests** (frontend): Define what the frontend expects from the API
+  - Location: `frontend/src/services/__tests__/api.pact.test.ts`
+  - Run: `cd frontend && npm run test:pact`
+  - Generates contract: `frontend/pact/pacts/tastyfrontend-tastybackend.json`
+
+- **Provider tests** (backend): Verify the backend fulfills the contract
+  - Location: `backend/src/__tests__/pact.provider.test.ts`
+  - Run: `cd backend && npm run test:pact`
+  - Reads contract from frontend and verifies all interactions
+
+**Workflow:**
+1. Run consumer tests first to generate the contract
+2. Run provider tests to verify backend matches expectations
+3. If provider tests fail, either update backend or frontend expectations
+
+**See [PACT_TESTING.md](./PACT_TESTING.md) for detailed documentation on contract testing.**
+
 ## Key Technologies
 
 - **Frontend**: React 18, Material-UI (MUI), Axios, PapaParse, react-dropzone, Jest, React Testing Library

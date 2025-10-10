@@ -30,6 +30,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:pact": "react-scripts test --testPathPattern=pact.test.ts --watchAll=false",
+    "test:pact:watch": "react-scripts test --testPathPattern=pact.test.ts",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -51,6 +53,12 @@
     ]
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^16.0.0",
     "@types/papaparse": "^5.3.14"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@pact-foundation|axios)/)"
+    ]
   }
 }
