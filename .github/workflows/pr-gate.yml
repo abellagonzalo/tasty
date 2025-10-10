@@ -28,7 +28,7 @@ jobs:
 
       - name: Run backend tests
         working-directory: ./backend
-        run: npm test
+        run: npm test -- --testPathIgnorePatterns=pact
 
   frontend-tests:
     name: Frontend Unit Tests
@@ -51,7 +51,7 @@ jobs:
 
       - name: Run frontend tests
         working-directory: ./frontend
-        run: npm test -- --watchAll=false --coverage
+        run: npm test -- --watchAll=false --coverage --testPathIgnorePatterns=pact
 
   contract-tests:
     name: Pact Contract Tests
