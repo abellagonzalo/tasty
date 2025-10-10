@@ -117,19 +117,23 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start backend server
-        working-directory: ./backend
-        run: npm start &
+      - name: Start servers and wait for readiness
+        run: |
+          # Start backend server
+          cd backend && npm start > backend.log 2>&1 &
+          BACKEND_PID=$!
+          echo "Backend PID: $BACKEND_PID"
+
+          # Start frontend server
+          cd ../frontend && npx serve -s build -l 3000 > frontend.log 2>&1 &
+          FRONTEND_PID=$!
+          echo "Frontend PID: $FRONTEND_PID"
+
+          # Wait for servers to be ready
+          cd ..
+          npx wait-on http://localhost:3001 http://localhost:3000 --timeout 60000
         env:
           NODE_ENV: test
-
-      - name: Start frontend server
-        working-directory: ./frontend
-        run: npx serve -s build -l 3000 &
-
-      - name: Wait for servers to be ready
-        run: |
-          npx wait-on http://localhost:3001 http://localhost:3000 --timeout 60000
 
       - name: Run Playwright tests
         run: npm run test:e2e
