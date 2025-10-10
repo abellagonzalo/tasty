@@ -24,7 +24,8 @@ cd frontend
 npm install          # Install dependencies
 npm start            # Start development server (port 3000)
 npm run build        # Build for production
-npm test             # Run tests (React Testing Library)
+npm test             # Run tests (React Testing Library + Jest)
+npm test -- ibkrService.test.ts  # Run specific test file
 ```
 
 ## Architecture
@@ -62,6 +63,7 @@ React application with service layer pattern:
 - **Services** (`frontend/src/services/`): Business logic and API communication
   - `api.ts`: Axios-based API client for backend communication
   - `ibkrService.ts`: CSV parsing and IBKR trade data processing using PapaParse
+  - `ibkrService.test.ts`: Unit tests for ibkrService (21 tests covering validation and parsing)
   - `positionService.ts`: Converts IBKR trades to positions and validates position data
 
 - **Types** (`frontend/src/types/`): TypeScript interfaces
@@ -117,10 +119,33 @@ All endpoints are prefixed with `/api/positions`:
 - `PUT /api/positions/:id` - Update position
 - `DELETE /api/positions/:id` - Delete position
 
+## Testing
+
+### Frontend Tests
+- **Framework**: Jest + React Testing Library
+- **Location**: `frontend/src/**/*.test.ts(x)`
+- **Run all tests**: `cd frontend && npm test`
+- **Run specific test**: `cd frontend && npm test -- ibkrService.test.ts`
+
+#### IBKRService Tests (`ibkrService.test.ts`)
+Comprehensive test coverage for CSV parsing and trade validation:
+- **validateTrade()**: 11 tests covering valid/invalid trade prices, quantities, strikes, and expiry dates
+- **parseCSV()**: 10 tests covering CSV parsing, filtering, error handling, and data transformation
+- **Mocked dependencies**: PapaParse is mocked for isolated unit testing
+
+When adding new features to `ibkrService.ts`, ensure corresponding tests are added to maintain coverage.
+
+### Backend Tests
+- **Framework**: Jest
+- **Location**: `backend/src/**/*.test.ts`
+- **Run all tests**: `cd backend && npm test`
+
+Currently, backend tests are not yet implemented. When adding backend tests, follow the same patterns as frontend tests.
+
 ## Key Technologies
 
-- **Frontend**: React 18, Material-UI (MUI), Axios, PapaParse, react-dropzone
-- **Backend**: Express 5, TypeScript, uuid (for ID generation)
+- **Frontend**: React 18, Material-UI (MUI), Axios, PapaParse, react-dropzone, Jest, React Testing Library
+- **Backend**: Express 5, TypeScript, uuid (for ID generation), Jest
 - **Shared**: TypeScript across both frontend and backend
 
 ## Important Notes
