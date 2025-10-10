@@ -106,18 +106,21 @@ export class PositionController {
 
   private validatePositionData(data: CreatePositionDTO): boolean {
     if (!data) return false;
-    
+
     return (
       typeof data.symbol === 'string' &&
-      data.symbol.length > 0 &&
+      data.symbol.trim().length > 0 &&
       Object.values(OptionType).includes(data.optionType) &&
       typeof data.strikePrice === 'number' &&
+      isFinite(data.strikePrice) &&
       data.strikePrice > 0 &&
       !isNaN(Date.parse(data.expirationDate)) &&
       Object.values(PositionSide).includes(data.positionSide) &&
       typeof data.quantity === 'number' &&
+      isFinite(data.quantity) &&
       data.quantity > 0 &&
       typeof data.entryPrice === 'number' &&
+      isFinite(data.entryPrice) &&
       data.entryPrice >= 0 &&
       !isNaN(Date.parse(data.entryDate))
     );
