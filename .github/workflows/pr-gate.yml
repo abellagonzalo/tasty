@@ -146,7 +146,7 @@ jobs:
           cat frontend/frontend.log || echo "No frontend log yet"
 
           # Wait for servers to be ready
-          npx wait-on http://localhost:3001 http://localhost:3000 --timeout 60000
+          npx wait-on http://localhost:3001/health http://localhost:3000 --timeout 60000
         env:
           NODE_ENV: test
 
