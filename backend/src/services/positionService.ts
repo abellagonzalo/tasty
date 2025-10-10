@@ -67,12 +67,17 @@ class PositionService {
 
   // Helper method to check for duplicate positions
   private isDuplicatePosition(position: CreatePositionDTO): boolean {
-    return this.positions.some(p => 
+    return this.positions.some(p =>
       p.symbol === position.symbol &&
       p.optionType === position.optionType &&
       p.strikePrice === position.strikePrice &&
       p.expirationDate === position.expirationDate
     );
+  }
+
+  // Helper method for testing - clears all positions
+  clearPositions(): void {
+    this.positions = [];
   }
 }
 
