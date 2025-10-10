@@ -117,41 +117,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start servers and wait for readiness
-        run: |
-          # Start backend server
-          cd backend
-          nohup npm start > backend.log 2>&1 &
-          BACKEND_PID=$!
-          echo "Backend PID: $BACKEND_PID"
-          sleep 2
-          cd ..
-
-          # Start frontend server
-          cd frontend
-          nohup npx serve -s build -l 3000 > frontend.log 2>&1 &
-          FRONTEND_PID=$!
-          echo "Frontend PID: $FRONTEND_PID"
-          sleep 2
-          cd ..
-
-          # Check if processes are still running
-          ps aux | grep $BACKEND_PID || echo "Backend process not found"
-          ps aux | grep $FRONTEND_PID || echo "Frontend process not found"
-
-          # Check logs before waiting
-          echo "=== Backend log ==="
-          cat backend/backend.log || echo "No backend log yet"
-          echo "=== Frontend log ==="
-          cat frontend/frontend.log || echo "No frontend log yet"
-
-          # Wait for servers to be ready
-          npx wait-on http://localhost:3001/health http://localhost:3000 --timeout 60000
-        env:
-          NODE_ENV: test
-
       - name: Run Playwright tests
         run: npm run test:e2e
+        env:
+          CI: true
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

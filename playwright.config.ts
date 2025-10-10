@@ -48,13 +48,17 @@ export default defineConfig({
   // Run your local dev servers before starting the tests
   webServer: [
     {
-      command: 'cd backend && npm run dev',
+      command: process.env.CI
+        ? 'cd backend && npm start'
+        : 'cd backend && npm run dev',
       port: 3001,
       timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'cd frontend && npm start',
+      command: process.env.CI
+        ? 'cd frontend && npx serve -s build -l 3000'
+        : 'cd frontend && npm start',
       port: 3000,
       timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
