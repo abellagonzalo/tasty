@@ -35,7 +35,7 @@ describe('Pact Verification', () => {
           'frontend',
           'pact',
           'pacts',
-          'tastyfrontend-tastybackend.json'
+          'TastyFrontend-TastyBackend.json'
         ),
       ],
 
