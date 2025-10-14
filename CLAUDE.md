@@ -51,6 +51,9 @@ The backend follows a three-layer architecture:
 
 Entry point: `backend/src/index.ts` (Express server with CORS enabled on port 3001)
 
+**Configuration** (`backend/src/app.ts`):
+- JSON body size limit: 50mb (to support large CSV imports from IBKR)
+
 ### Frontend Structure
 
 React application with service layer pattern:
