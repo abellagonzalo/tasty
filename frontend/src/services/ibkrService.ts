@@ -7,6 +7,38 @@ export class IBKRService {
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
+                transformHeader: (header: string, index: number) => {
+                    // Keep the header as-is
+                    return header;
+                },
+                beforeFirstChunk: (chunk: string) => {
+                    // Split into lines and filter out additional headers and cash transaction sections
+                    const lines = chunk.split('\n');
+                    const filteredLines: string[] = [];
+                    let isFirstHeader = true;
+
+                    for (const line of lines) {
+                        // Skip header rows after the first one
+                        if (line.startsWith('"HEADER",')) {
+                            if (isFirstHeader) {
+                                filteredLines.push(line);
+                                isFirstHeader = false;
+                            }
+                            // Skip subsequent headers
+                            continue;
+                        }
+
+                        // Skip cash transaction rows (CTRN)
+                        if (line.startsWith('"DATA","CTRN"')) {
+                            continue;
+                        }
+
+                        // Keep all other rows (including TRNT trade data)
+                        filteredLines.push(line);
+                    }
+
+                    return filteredLines.join('\n');
+                },
                 complete: (results) => {
                     try {
                         const trades = this.processRows(results.data as IBKRCSVRow[]);
