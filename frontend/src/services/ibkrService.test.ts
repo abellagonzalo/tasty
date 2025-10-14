@@ -654,5 +654,322 @@ describe('IBKRService', () => {
             expect(result.trades[0].symbol).toBe('SPY');
             expect(result.trades[1].symbol).toBe('AAPL');
         });
+
+        // Tests for multi-section CSV support (TRNT and CTRN)
+        describe('Multi-section CSV handling', () => {
+            it('should filter out CTRN (cash transaction) rows', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                // Simulate CSV content with both TRNT and CTRN sections
+                const csvContent = `"HEADER","TRNT","ClientAccountID","Symbol","TradePrice"
+"DATA","TRNT","U12345","SPY","5.50"
+"HEADER","CTRN","ClientAccountID","Amount","Type"
+"DATA","CTRN","U12345","1000","Deposit"`;
+
+                const mockRows: IBKRCSVRow[] = [
+                    {
+                        DateTime: '2024-01-15 10:30:00',
+                        Symbol: 'SPY',
+                        Description: 'SPY JAN24 450 CALL',
+                        TradePrice: '5.50',
+                        Quantity: '1',
+                        'Put/Call': 'C',
+                        Strike: '450',
+                        Expiry: '2024-01-19',
+                        TransactionType: 'ExchTrade',
+                        'Buy/Sell': 'BUY',
+                        IBCommission: '-1.00',
+                        NetCash: '-551.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    }
+                ];
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    // Simulate beforeFirstChunk filtering
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        // Verify CTRN rows are filtered out
+                        expect(transformed).not.toContain('CTRN');
+                    }
+                    config.complete({ data: mockRows, errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(1);
+                expect(result.trades[0].symbol).toBe('SPY');
+            });
+
+            it('should handle CSV with multiple HEADER rows (TRNT and CTRN sections)', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                const csvContent = `"HEADER","TRNT","Field1","Field2","Field3"
+"DATA","TRNT","U12345","SPY","5.50"
+"HEADER","CTRN","Field1","Field2"
+"DATA","CTRN","U12345","1000"`;
+
+                const mockRows: IBKRCSVRow[] = [
+                    {
+                        DateTime: '2024-01-15 10:30:00',
+                        Symbol: 'SPY',
+                        Description: 'SPY JAN24 450 CALL',
+                        TradePrice: '5.50',
+                        Quantity: '1',
+                        'Put/Call': 'C',
+                        Strike: '450',
+                        Expiry: '2024-01-19',
+                        TransactionType: 'ExchTrade',
+                        'Buy/Sell': 'BUY',
+                        IBCommission: '-1.00',
+                        NetCash: '-551.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    }
+                ];
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        // Verify only one HEADER line remains
+                        const headerCount = (transformed.match(/"HEADER"/g) || []).length;
+                        expect(headerCount).toBe(1);
+                    }
+                    config.complete({ data: mockRows, errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(1);
+            });
+
+            it('should handle real IBKR format with TRNT trades followed by CTRN deposits', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                // Realistic IBKR CSV with 87 fields for TRNT and 47 fields for CTRN
+                const csvContent = `"HEADER","TRNT","ClientAccountID","Symbol","Strike","Expiry","Put/Call","TradePrice","Quantity"
+"DATA","TRNT","U18451778","SPY","450","2024-01-19","C","5.50","1"
+"DATA","TRNT","U18451778","AAPL","180","2024-01-19","P","3.50","2"
+"HEADER","CTRN","ClientAccountID","Amount","Type","Date"
+"DATA","CTRN","U18451778","1000","Deposits/Withdrawals","2024-01-01"
+"DATA","CTRN","U18451778","500","Deposits/Withdrawals","2024-01-02"`;
+
+                const mockRows: IBKRCSVRow[] = [
+                    {
+                        DateTime: '2024-01-15 10:30:00',
+                        Symbol: 'SPY',
+                        Description: 'SPY JAN24 450 CALL',
+                        TradePrice: '5.50',
+                        Quantity: '1',
+                        'Put/Call': 'C',
+                        Strike: '450',
+                        Expiry: '2024-01-19',
+                        TransactionType: 'ExchTrade',
+                        'Buy/Sell': 'BUY',
+                        IBCommission: '-1.00',
+                        NetCash: '-551.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    },
+                    {
+                        DateTime: '2024-01-15 14:30:00',
+                        Symbol: 'AAPL',
+                        Description: 'AAPL JAN24 180 PUT',
+                        TradePrice: '3.50',
+                        Quantity: '2',
+                        'Put/Call': 'P',
+                        Strike: '180',
+                        Expiry: '2024-01-19',
+                        TransactionType: 'ExchTrade',
+                        'Buy/Sell': 'SELL',
+                        IBCommission: '-2.00',
+                        NetCash: '698.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    }
+                ];
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        // Verify CTRN section is completely removed
+                        expect(transformed).not.toContain('"CTRN"');
+                        expect(transformed).not.toContain('Deposits/Withdrawals');
+                        // Verify TRNT data is preserved
+                        expect(transformed).toContain('"TRNT"');
+                        expect(transformed).toContain('SPY');
+                        expect(transformed).toContain('AAPL');
+                    }
+                    config.complete({ data: mockRows, errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(2);
+                expect(result.trades[0].symbol).toBe('SPY');
+                expect(result.trades[1].symbol).toBe('AAPL');
+            });
+
+            it('should return empty trades array when CSV contains only CTRN rows', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                const csvContent = `"HEADER","CTRN","ClientAccountID","Amount","Type"
+"DATA","CTRN","U12345","1000","Deposit"
+"DATA","CTRN","U12345","500","Withdrawal"`;
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        // Should filter out all CTRN content
+                        expect(transformed).not.toContain('"DATA","CTRN"');
+                    }
+                    config.complete({ data: [], errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(0);
+            });
+
+            it('should filter ExchTrade from TRNT section while ignoring CTRN section', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                const csvContent = `"HEADER","TRNT","Symbol","TransactionType"
+"DATA","TRNT","SPY","ExchTrade"
+"DATA","TRNT","AAPL","Commission"
+"DATA","TRNT","TSLA","BookTrade"
+"HEADER","CTRN","Amount","Type"
+"DATA","CTRN","1000","Deposit"`;
+
+                const mockRows: IBKRCSVRow[] = [
+                    {
+                        DateTime: '2024-01-15 10:30:00',
+                        Symbol: 'SPY',
+                        Description: 'SPY JAN24 450 CALL',
+                        TradePrice: '5.50',
+                        Quantity: '1',
+                        'Put/Call': 'C',
+                        Strike: '450',
+                        Expiry: '2024-01-19',
+                        TransactionType: 'ExchTrade',
+                        'Buy/Sell': 'BUY',
+                        IBCommission: '-1.00',
+                        NetCash: '-551.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    },
+                    {
+                        DateTime: '2024-01-15 11:00:00',
+                        Symbol: 'AAPL',
+                        Description: 'Commission',
+                        TradePrice: '0',
+                        Quantity: '0',
+                        'Put/Call': '',
+                        Strike: '',
+                        Expiry: '',
+                        TransactionType: 'Commission',
+                        'Buy/Sell': 'BUY',
+                        IBCommission: '-1.00',
+                        NetCash: '-1.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    },
+                    {
+                        DateTime: '2024-01-15 12:00:00',
+                        Symbol: 'TSLA',
+                        Description: 'Book Trade',
+                        TradePrice: '5.00',
+                        Quantity: '1',
+                        'Put/Call': '',
+                        Strike: '',
+                        Expiry: '',
+                        TransactionType: 'BookTrade',
+                        'Buy/Sell': 'BUY',
+                        IBCommission: '0',
+                        NetCash: '-500.00',
+                        'Open/CloseIndicator': 'O',
+                        FifoPnlRealized: '0',
+                        MtmPnl: '0'
+                    }
+                ];
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        // CTRN section should be filtered
+                        expect(transformed).not.toContain('"DATA","CTRN"');
+                    }
+                    config.complete({ data: mockRows, errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                // processRows filters to only ExchTrade
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(1);
+                expect(result.trades[0].transactionType).toBe('ExchTrade');
+                expect(result.trades[0].symbol).toBe('SPY');
+            });
+
+            it('should handle CSV with empty TRNT section and populated CTRN section', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                const csvContent = `"HEADER","TRNT","Symbol","TradePrice"
+"HEADER","CTRN","Amount","Type"
+"DATA","CTRN","U12345","1000","Deposit"`;
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        // Second header and CTRN data should be filtered
+                        const headerCount = (transformed.match(/"HEADER"/g) || []).length;
+                        expect(headerCount).toBe(1);
+                        expect(transformed).not.toContain('"CTRN"');
+                    }
+                    config.complete({ data: [], errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(0);
+            });
+
+            it('should handle CSV with headers but no data rows', async () => {
+                const mockFile = new File(['test'], 'test.csv');
+
+                const csvContent = `"HEADER","TRNT","Symbol","TradePrice","Quantity"`;
+
+                mockedPapa.parse.mockImplementation((file: any, config: any) => {
+                    if (config.beforeFirstChunk) {
+                        const transformed = config.beforeFirstChunk(csvContent);
+                        expect(transformed).toContain('"HEADER"');
+                    }
+                    config.complete({ data: [], errors: [] });
+                    return {} as any;
+                });
+
+                const result = await IBKRService.parseCSV(mockFile);
+
+                expect(result.success).toBe(true);
+                expect(result.trades).toHaveLength(0);
+            });
+        });
     });
 });
