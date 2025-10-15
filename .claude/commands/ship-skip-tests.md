@@ -8,7 +8,9 @@ Automate the PR workflow WITHOUT running local tests (useful when CI will catch 
    - Check if already on a feature branch or on master
 
 2. **Create or verify branch**:
-   - If on master, ask the user for a branch name and create it
+   - If on master, ask the user for a branch name and create it using git worktrees:
+     - Use `git worktree add -b <branch-name> ../<branch-name>` to create the branch in a new worktree
+     - This creates the branch in a sibling directory, keeping the main workspace clean
    - If already on a feature branch, continue with that branch
 
 3. **Commit changes**:
