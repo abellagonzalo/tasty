@@ -13,7 +13,9 @@ Automate the PR workflow but stop before merging (for manual review):
    - Check if already on a feature branch or on master
 
 3. **Create or verify branch**:
-   - If on master, ask the user for a branch name and create it
+   - If on master, ask the user for a branch name and create it using git worktrees:
+     - Use `git worktree add -b <branch-name> ../<branch-name>` to create the branch in a new worktree
+     - This creates the branch in a sibling directory, keeping the main workspace clean
    - If already on a feature branch, continue with that branch
 
 4. **Commit changes**:
