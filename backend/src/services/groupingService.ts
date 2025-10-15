@@ -1,4 +1,4 @@
-import { Trade } from '../models/Trade';
+import { Position } from '../models/Position';
 import { TradeGroup, CreateTradeGroupDTO } from '../models/TradeGroup';
 
 // Contract multiplier for options (standard is 100)
@@ -6,75 +6,75 @@ const CONTRACT_MULTIPLIER = 100;
 
 export interface GroupingResult {
   groups: CreateTradeGroupDTO[];
-  tradesWithGroups: Array<{ trade: Trade; groupKey: string }>;
+  positionsWithGroups: Array<{ position: Position; groupKey: string }>;
 }
 
 /**
- * Generate a group key from dateTime and underlying symbol
+ * Generate a group key from entryDate and underlying symbol
  */
-const generateGroupKey = (dateTime: string, underlying: string): string => {
-  return `${dateTime}_${underlying}`;
+const generateGroupKey = (entryDate: string, underlying: string): string => {
+  return `${entryDate}_${underlying}`;
 };
 
 /**
- * Generate strategy name from the date portion of a timestamp
+ * Generate strategy name from the date portion of an entryDate timestamp
  * Example: "2025-01-15T10:30:00.000Z" -> "strategy-2025-01-15"
  */
-export const generateStrategyName = (dateTime: string): string => {
-  const date = dateTime.split('T')[0];
+export const generateStrategyName = (entryDate: string): string => {
+  const date = entryDate.split('T')[0];
   return `strategy-${date}`;
 };
 
 /**
- * Calculate gross proceeds for a single trade
- * Formula: abs(quantity) × tradePrice × CONTRACT_MULTIPLIER
+ * Calculate gross proceeds for a single position
+ * Formula: abs(quantity) × entryPrice × CONTRACT_MULTIPLIER
  */
-export const calculateTradeGrossProceeds = (trade: Trade): number => {
-  return Math.abs(trade.quantity) * trade.tradePrice * CONTRACT_MULTIPLIER;
+export const calculatePositionGrossProceeds = (position: Position): number => {
+  return Math.abs(position.quantity) * position.entryPrice * CONTRACT_MULTIPLIER;
 };
 
 /**
- * Calculate total gross proceeds for an array of trades
+ * Calculate total gross proceeds for an array of positions
  */
-export const calculateGrossProceeds = (trades: Trade[]): number => {
-  return trades.reduce((sum, trade) => sum + calculateTradeGrossProceeds(trade), 0);
+export const calculateGrossProceeds = (positions: Position[]): number => {
+  return positions.reduce((sum, position) => sum + calculatePositionGrossProceeds(position), 0);
 };
 
 /**
- * Main grouping algorithm: Groups trades by exact timestamp and underlying symbol
+ * Main grouping algorithm: Groups positions by exact timestamp and underlying symbol
  *
- * @param trades - Array of trades to group
- * @returns GroupingResult containing groups and trades with their assigned group keys
+ * @param positions - Array of positions to group
+ * @returns GroupingResult containing groups and positions with their assigned group keys
  */
-export const groupTrades = (trades: Trade[]): GroupingResult => {
-  // Sort trades by dateTime (ascending)
-  const sortedTrades = [...trades].sort((a, b) =>
-    a.dateTime.localeCompare(b.dateTime)
+export const groupPositions = (positions: Position[]): GroupingResult => {
+  // Sort positions by entryDate (ascending)
+  const sortedPositions = [...positions].sort((a, b) =>
+    a.entryDate.localeCompare(b.entryDate)
   );
 
-  // Group trades by (dateTime + underlying)
-  const tradesByGroup = new Map<string, Trade[]>();
+  // Group positions by (entryDate + underlying)
+  const positionsByGroup = new Map<string, Position[]>();
 
-  for (const trade of sortedTrades) {
-    const groupKey = generateGroupKey(trade.dateTime, trade.symbol);
+  for (const position of sortedPositions) {
+    const groupKey = generateGroupKey(position.entryDate, position.symbol);
 
-    if (!tradesByGroup.has(groupKey)) {
-      tradesByGroup.set(groupKey, []);
+    if (!positionsByGroup.has(groupKey)) {
+      positionsByGroup.set(groupKey, []);
     }
 
-    tradesByGroup.get(groupKey)!.push(trade);
+    positionsByGroup.get(groupKey)!.push(position);
   }
 
   // Create TradeGroup DTOs for each group
   const groups: CreateTradeGroupDTO[] = [];
-  const tradesWithGroups: Array<{ trade: Trade; groupKey: string }> = [];
+  const positionsWithGroups: Array<{ position: Position; groupKey: string }> = [];
 
-  for (const [groupKey, groupTrades] of tradesByGroup.entries()) {
-    // Use the first trade's dateTime to generate strategy name
-    const firstTrade = groupTrades[0];
-    const strategy = generateStrategyName(firstTrade.dateTime);
-    const underlying = firstTrade.symbol;
-    const grossProceeds = calculateGrossProceeds(groupTrades);
+  for (const [groupKey, groupPositions] of positionsByGroup.entries()) {
+    // Use the first position's entryDate to generate strategy name
+    const firstPosition = groupPositions[0];
+    const strategy = generateStrategyName(firstPosition.entryDate);
+    const underlying = firstPosition.symbol;
+    const grossProceeds = calculateGrossProceeds(groupPositions);
 
     const group: CreateTradeGroupDTO = {
       strategy,
@@ -84,14 +84,14 @@ export const groupTrades = (trades: Trade[]): GroupingResult => {
 
     groups.push(group);
 
-    // Track which trades belong to which group
-    for (const trade of groupTrades) {
-      tradesWithGroups.push({ trade, groupKey });
+    // Track which positions belong to which group
+    for (const position of groupPositions) {
+      positionsWithGroups.push({ position, groupKey });
     }
   }
 
   return {
     groups,
-    tradesWithGroups,
+    positionsWithGroups,
   };
 };
