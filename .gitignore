@@ -69,6 +69,7 @@ temp/
 
 # Claude Code
 .claude/
+!.claude/commands/
 
 # Playwright
 /test-results/
